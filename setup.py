@@ -9,9 +9,11 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "requests>=2.5.3",
-        "tornado>=4.1",
-        "gevent>=1.0.2",
-        "redis>=2.10.3",
+        "grequests==0.3.0",
+        "requests==2.5.3",
+        "tornado==4.1",
+        "gevent==1.0.2",
+        "redis==2.10.3",
+        "simplejson==3.6.2"
     ],
 )

@@ -18,17 +18,23 @@ class AggregatorApiHandler(web.RequestHandler):
     def get(self):
         rs = (grequests.get(u) for u in self.urls)
         responses = grequests.map(rs)
-        all_results = [res.json()['results'] for res in responses]
+        # filter out responses that indicate some sort of error occurred
+        all_results = [res.json()['results'] for res in responses if res and res.status_code == 200]
         final = []
         while all_results:
+            # the list is built backwards and then reversed, as popping from the end of a list is quicker
             next_index = AggregatorApiHandler.pick_lowest_ecstasy(all_results)
             final.append(all_results[next_index].pop())
             if not all_results[next_index]:
                 del all_results[next_index]
-        final.reverse()
-        self.write({
-            "results": final,
-        })
+        if final:
+            final.reverse()
+            self.write({
+                "results": final,
+            })
+        else:
+            # If no results are available, send Resource Not Available error code
+            self.send_error(503)
 
 ROUTES = [
     (r"/hotels/search", AggregatorApiHandler),
@@ -38,7 +44,7 @@ ROUTES = [
 def run():
     app = web.Application(
         ROUTES,
-        debug=True,
+        debug=True
     )
 
     app.listen(8000)
